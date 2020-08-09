@@ -98,6 +98,8 @@
 /**#define DEBUG_DUMPCAP**/
 /**#define DEBUG_CHILD_DUMPCAP**/
 
+#define PRINT_NAME(name) printf("[%s:%d] %s\n", __func__, __LINE__, name)
+
 #ifdef _WIN32
 #include "wsutil/win32-utils.h"
 #ifdef DEBUG_DUMPCAP
@@ -3085,6 +3087,7 @@ capture_loop_close_output(capture_options *capture_opts, loop_data *ld, int *err
     g_log(LOG_DOMAIN_CAPTURE_CHILD, G_LOG_LEVEL_DEBUG, "capture_loop_close_output");
 
     if (capture_opts->multi_files_on) {
+        PRINT_NAME(capture_opts->save_file);
         return ringbuf_libpcap_dump_close(&capture_opts->save_file, err_close);
     } else {
         if (capture_opts->use_pcapng) {
@@ -3355,6 +3358,7 @@ capture_loop_open_output(capture_options *capture_opts, int *save_file_fd,
     gboolean  is_tempfile;
     GError   *err_tempfile = NULL;
 
+    PRINT_NAME(capture_opts->save_file);
     g_log(LOG_DOMAIN_CAPTURE_CHILD, G_LOG_LEVEL_DEBUG, "capture_loop_open_output: %s",
           (capture_opts->save_file) ? capture_opts->save_file : "(not specified)");
 
@@ -3512,9 +3516,11 @@ capture_loop_open_output(capture_options *capture_opts, int *save_file_fd,
         /* In ringbuffer mode, save_file points to a filename from ringbuffer.c.
          * capfile_name was already freed before. */
         capture_opts->save_file = (char *)ringbuf_current_filename();
+        PRINT_NAME(capture_opts->save_file);
     } else {
         /* capture_opts_cleanup will g_free(capture_opts->save_file). */
         capture_opts->save_file = capfile_name;
+        PRINT_NAME(capture_opts->save_file);
     }
 
     return TRUE;
@@ -3543,6 +3549,7 @@ do_file_switch_or_stop(capture_options *capture_opts)
         }
 
         /* Switch to the next ringbuffer file */
+        PRINT_NAME(capture_opts->save_file);
         if (ringbuf_switch_file(&global_ld.pdh, &capture_opts->save_file,
                                 &global_ld.save_file_fd, &global_ld.err)) {
 
@@ -3576,6 +3583,7 @@ do_file_switch_or_stop(capture_options *capture_opts)
             if (!quiet)
                 report_packet_count(global_ld.inpkts_to_sync_pipe);
             global_ld.inpkts_to_sync_pipe = 0;
+            PRINT_NAME(capture_opts->save_file);
             report_new_capture_file(capture_opts->save_file);
         } else {
             /* File switch failed: stop here */
@@ -3763,6 +3771,7 @@ capture_loop_start(capture_options *capture_opts, gboolean *stats_known, struct 
            update its windows to indicate that we have a live capture in
            progress. */
         fflush(global_ld.pdh);
+        PRINT_NAME(capture_opts->save_file);
         report_new_capture_file(capture_opts->save_file);
     }
 
@@ -4006,6 +4015,7 @@ capture_loop_start(capture_options *capture_opts, gboolean *stats_known, struct 
     if (global_ld.err == 0) {
         write_ok = TRUE;
     } else {
+        PRINT_NAME(capture_opts->save_file);
         capture_loop_get_errmsg(errmsg, sizeof(errmsg), secondary_errmsg,
                                 sizeof(secondary_errmsg),
                                 capture_opts->save_file, global_ld.err, FALSE);
@@ -4030,6 +4040,7 @@ capture_loop_start(capture_options *capture_opts, gboolean *stats_known, struct 
     /* If we've displayed a message about a write error, there's no point
        in displaying another message about an error on close. */
     if (!close_ok && write_ok) {
+        PRINT_NAME(capture_opts->save_file);
         capture_loop_get_errmsg(errmsg, sizeof(errmsg), secondary_errmsg,
                                 sizeof(secondary_errmsg),
                                 capture_opts->save_file, err_close, TRUE);
@@ -4093,6 +4104,7 @@ error:
 
         /* We couldn't even start the capture, so get rid of the capture
            file. */
+        PRINT_NAME(capture_opts->save_file);
         if (capture_opts->save_file != NULL) {
             ws_unlink(capture_opts->save_file);
         }
