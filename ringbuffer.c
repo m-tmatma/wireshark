@@ -36,6 +36,7 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "wspcap.h"
 
@@ -64,6 +65,7 @@ typedef struct _ringbuf_data {
   char         *io_buffer;              /**< The IO buffer used to write to the file */
   gboolean      group_read_access;   /**< TRUE if files need to be opened with group read access */
   FILE         *name_h;              /**< write names of completed files to this handle */
+  gchar        *filter_program;         /** filter program */
 } ringbuf_data;
 
 static ringbuf_data rb_data;
@@ -80,6 +82,18 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
   struct tm *tm;
 
   if (rfile->name != NULL) {
+    if (rb_data.filter_program != NULL)
+    {
+      char    command[256];
+      int n;
+      sprintf(command, "%s %s", rb_data.filter_program, rfile->name);
+      n = system(command);
+      if (n != 0)
+      {
+        return -1;
+      }
+    }
+
     if (rb_data.unlimited == FALSE) {
       /* remove old file (if any, so ignore error) */
       ws_unlink(rfile->name);
@@ -121,7 +135,7 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
  * Initialize the ringbuffer data structures
  */
 int
-ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_access)
+ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_access, gchar *filter_program)
 {
   unsigned int i;
   char        *pfx, *last_pathsep;
@@ -137,6 +151,7 @@ ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_acce
   rb_data.io_buffer = NULL;
   rb_data.group_read_access = group_read_access;
   rb_data.name_h = NULL;
+  rb_data.filter_program = filter_program;
 
   /* just to be sure ... */
   if (num_files <= RINGBUFFER_MAX_NUM_FILES) {

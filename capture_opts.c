@@ -118,6 +118,7 @@ capture_opts_init(capture_options *capture_opts)
     capture_opts->capture_child                   = FALSE;
     capture_opts->print_file_names                = FALSE;
     capture_opts->print_name_to                   = NULL;
+    capture_opts->filter_program                  = NULL;
 }
 
 void
@@ -977,6 +978,13 @@ capture_opts_add_opt(capture_options *capture_opts, int opt, const char *optarg_
                 return 1;
             }
         }
+        break;
+    case LONGOPT_FILTER_PROGRAM:  /* filter program */
+        if (capture_opts->filter_program) {
+            cmdarg_err("--filter_program can be set only once");
+            return 1;
+        }
+        capture_opts->filter_program = g_strdup(optarg_str_p);
         break;
     default:
         /* the caller is responsible to send us only the right opt's */
