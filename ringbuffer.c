@@ -64,6 +64,8 @@ typedef struct _ringbuf_data {
   FILE         *pdh;
   char         *io_buffer;              /**< The IO buffer used to write to the file */
   gboolean      group_read_access;   /**< TRUE if files need to be opened with group read access */
+
+  ringbuf_compress compress;         /** compress capture data */
 } ringbuf_data;
 
 static ringbuf_data rb_data;
@@ -86,9 +88,12 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
 
   PRINT_NAME(rfile->name);
   if (rfile->name != NULL) {
-    sprintf(command, "gzip %s", rfile->name);
-    n = system(command);
-    PRINT("%s => %d\n", command, n);
+    if (rb_data.compress == RINGBUFFER_COMPRESS_GZ)
+    {
+      sprintf(command, "gzip %s", rfile->name);
+      n = system(command);
+      PRINT("%s => %d\n", command, n);
+    }
 
     if (rb_data.unlimited == FALSE) {
       /* remove old file (if any, so ignore error) */
@@ -133,7 +138,7 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
  * Initialize the ringbuffer data structures
  */
 int
-ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_access)
+ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_access, ringbuf_compress compress)
 {
   unsigned int i;
   char        *pfx, *last_pathsep;
@@ -150,6 +155,7 @@ ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_acce
   rb_data.pdh = NULL;
   rb_data.io_buffer = NULL;
   rb_data.group_read_access = group_read_access;
+  rb_data.compress = compress;
 
   /* just to be sure ... */
   if (num_files <= RINGBUFFER_MAX_NUM_FILES) {

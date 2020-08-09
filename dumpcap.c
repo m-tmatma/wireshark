@@ -3403,7 +3403,8 @@ capture_loop_open_output(capture_options *capture_opts, int *save_file_fd,
                 /* ringbuffer is enabled */
                 *save_file_fd = ringbuf_init(capfile_name,
                                              (capture_opts->has_ring_num_files) ? capture_opts->ring_num_files : 0,
-                                             capture_opts->group_read_access);
+                                             capture_opts->group_read_access,
+                                             capture_opts->compress);
 
                 /* capfile_name is unused as the ringbuffer provides its own filename. */
                 if (*save_file_fd != -1) {
@@ -4909,6 +4910,7 @@ main(int argc, char *argv[])
 #ifdef HAVE_PCAP_CREATE
         case 'I':        /* Monitor mode */
 #endif
+        case 'm':        /* compression */
             status = capture_opts_add_opt(&global_capture_opts, opt, optarg, &start_capture);
             if (status != 0) {
                 exit_main(status);

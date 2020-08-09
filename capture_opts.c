@@ -972,6 +972,16 @@ capture_opts_add_opt(capture_options *capture_opts, int opt, const char *optarg_
             }
         }
         break;
+    case 'm':        /* compress */
+        if (strcmp(optarg_str_p, "gz") == 0)
+        {
+            capture_opts->compress = RINGBUFFER_COMPRESS_GZ;
+        }
+        else
+        {
+            capture_opts->compress = RINGBUFFER_COMPRESS_NONE;
+        }
+        break;
     default:
         /* the caller is responsible to send us only the right opt's */
         g_assert_not_reached();

@@ -21,6 +21,7 @@
 #include <sys/types.h>     /* for gid_t */
 
 #include <caputils/capture_ifinfo.h>
+#include "ringbuffer.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -85,11 +86,13 @@ extern "C" {
     {"snapshot-length",       required_argument, NULL, 's'}, \
     {"linktype",              required_argument, NULL, 'y'}, \
     {"list-time-stamp-types", no_argument,       NULL, LONGOPT_LIST_TSTAMP_TYPES}, \
-    {"time-stamp-type",       required_argument, NULL, LONGOPT_SET_TSTAMP_TYPE},
+    {"time-stamp-type",       required_argument, NULL, LONGOPT_SET_TSTAMP_TYPE}, \
+    {"compression",           required_argument, NULL, 'm'},
 
 
+#define OPTSTRING_M ""
 #define OPTSTRING_CAPTURE_COMMON \
-    "a:" OPTSTRING_A "b:" OPTSTRING_B "c:Df:i:" OPTSTRING_I "Lps:y:"
+    "a:" OPTSTRING_A "b:" OPTSTRING_B "c:Df:i:" OPTSTRING_I "Lps:y:" "m:" OPTSTRING_M
 
 #ifdef HAVE_PCAP_REMOTE
 /* Type of capture source */
@@ -314,6 +317,8 @@ typedef struct capture_options_tag {
     /* internally used (don't touch from outside) */
     gboolean           output_to_pipe;        /**< save_file is a pipe (named or stdout) */
     gboolean           capture_child;         /**< hidden option: Wireshark child mode */
+
+    ringbuf_compress    compress;             /**< compression option */
 } capture_options;
 
 /* initialize the capture_options with some reasonable values */
