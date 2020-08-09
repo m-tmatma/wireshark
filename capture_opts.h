@@ -46,6 +46,7 @@ extern "C" {
 #define LONGOPT_NUM_CAP_COMMENT   LONGOPT_BASE_CAPTURE+1
 #define LONGOPT_LIST_TSTAMP_TYPES LONGOPT_BASE_CAPTURE+2
 #define LONGOPT_SET_TSTAMP_TYPE   LONGOPT_BASE_CAPTURE+3
+#define LONGOPT_FILTER_PROGRAM    LONGOPT_BASE_CAPTURE+4
 
 /*
  * Options for capturing common to all capturing programs.
@@ -87,12 +88,11 @@ extern "C" {
     {"linktype",              required_argument, NULL, 'y'}, \
     {"list-time-stamp-types", no_argument,       NULL, LONGOPT_LIST_TSTAMP_TYPES}, \
     {"time-stamp-type",       required_argument, NULL, LONGOPT_SET_TSTAMP_TYPE}, \
-    {"compression",           required_argument, NULL, 'm'},
+    {"filter-program",        required_argument, NULL, LONGOPT_FILTER_PROGRAM},
 
 
-#define OPTSTRING_M ""
 #define OPTSTRING_CAPTURE_COMMON \
-    "a:" OPTSTRING_A "b:" OPTSTRING_B "c:Df:i:" OPTSTRING_I "Lps:y:" "m:" OPTSTRING_M
+    "a:" OPTSTRING_A "b:" OPTSTRING_B "c:Df:i:" OPTSTRING_I "Lps:y:"
 
 #ifdef HAVE_PCAP_REMOTE
 /* Type of capture source */
@@ -318,7 +318,7 @@ typedef struct capture_options_tag {
     gboolean           output_to_pipe;        /**< save_file is a pipe (named or stdout) */
     gboolean           capture_child;         /**< hidden option: Wireshark child mode */
 
-    ringbuf_compress    compress;             /**< compression option */
+    gchar              *filter_program;       /**< file program */
 } capture_options;
 
 /* initialize the capture_options with some reasonable values */

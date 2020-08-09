@@ -116,6 +116,7 @@ capture_opts_init(capture_options *capture_opts)
 
     capture_opts->output_to_pipe                  = FALSE;
     capture_opts->capture_child                   = FALSE;
+    capture_opts->filter_program                  = NULL;
 }
 
 void
@@ -972,15 +973,12 @@ capture_opts_add_opt(capture_options *capture_opts, int opt, const char *optarg_
             }
         }
         break;
-    case 'm':        /* compress */
-        if (strcmp(optarg_str_p, "gz") == 0)
-        {
-            capture_opts->compress = RINGBUFFER_COMPRESS_GZ;
+    case LONGOPT_FILTER_PROGRAM:  /* filter program */
+        if (capture_opts->filter_program) {
+            cmdarg_err("--filter_program can be set only once");
+            return 1;
         }
-        else
-        {
-            capture_opts->compress = RINGBUFFER_COMPRESS_NONE;
-        }
+        capture_opts->filter_program = g_strdup(optarg_str_p);
         break;
     default:
         /* the caller is responsible to send us only the right opt's */

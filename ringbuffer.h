@@ -24,13 +24,7 @@
 #define RINGBUFFER_WARN_NUM_FILES 65535
 
 
-/* Type of compress */
-typedef enum {
-    RINGBUFFER_COMPRESS_NONE,  /**< compression none */
-    RINGBUFFER_COMPRESS_GZ     /**< compression gz */
-} ringbuf_compress;
-
-int ringbuf_init(const char *capture_name, guint num_files, gboolean group_read_access, ringbuf_compress compress);
+int ringbuf_init(const char *capture_name, guint num_files, gboolean group_read_access, gchar *filter_program);
 gboolean ringbuf_is_initialized(void);
 const gchar *ringbuf_current_filename(void);
 FILE *ringbuf_init_libpcap_fdopen(int *err);

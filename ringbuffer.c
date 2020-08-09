@@ -65,7 +65,7 @@ typedef struct _ringbuf_data {
   char         *io_buffer;              /**< The IO buffer used to write to the file */
   gboolean      group_read_access;   /**< TRUE if files need to be opened with group read access */
 
-  ringbuf_compress compress;         /** compress capture data */
+  gchar        *filter_program;         /** filter program */
 } ringbuf_data;
 
 static ringbuf_data rb_data;
@@ -88,9 +88,9 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
 
   PRINT_NAME(rfile->name);
   if (rfile->name != NULL) {
-    if (rb_data.compress == RINGBUFFER_COMPRESS_GZ)
+    if (rb_data.filter_program != NULL)
     {
-      sprintf(command, "gzip %s", rfile->name);
+      sprintf(command, "%s %s", rb_data.filter_program, rfile->name);
       n = system(command);
       PRINT("%s => %d\n", command, n);
     }
@@ -138,7 +138,7 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
  * Initialize the ringbuffer data structures
  */
 int
-ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_access, ringbuf_compress compress)
+ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_access, gchar *filter_program)
 {
   unsigned int i;
   char        *pfx, *last_pathsep;
@@ -155,7 +155,7 @@ ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_acce
   rb_data.pdh = NULL;
   rb_data.io_buffer = NULL;
   rb_data.group_read_access = group_read_access;
-  rb_data.compress = compress;
+  rb_data.filter_program = filter_program;
 
   /* just to be sure ... */
   if (num_files <= RINGBUFFER_MAX_NUM_FILES) {
