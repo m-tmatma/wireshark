@@ -36,6 +36,7 @@
 #include <string.h>
 #include <time.h>
 #include <errno.h>
+#include <stdlib.h>
 
 #include "wspcap.h"
 
@@ -80,9 +81,15 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
   char    timestr[14+1];
   time_t  current_time;
   struct tm *tm;
+  char    command[256];
+  int n;
 
   PRINT_NAME(rfile->name);
   if (rfile->name != NULL) {
+    sprintf(command, "gzip %s", rfile->name);
+    n = system(command);
+    PRINT("%s => %d\n", command, n);
+
     if (rb_data.unlimited == FALSE) {
       /* remove old file (if any, so ignore error) */
       ws_unlink(rfile->name);
