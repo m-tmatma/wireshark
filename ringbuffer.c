@@ -69,7 +69,7 @@ static ringbuf_data rb_data;
 
 #define PRINT_NAME(name) printf("[%s:%d] %s => %s\n", __func__, __LINE__, #name, name)
 #define PRINT_INT(name) printf("[%s:%d] %s => %d\n", __func__, __LINE__, #name, name)
-
+#define PRINT(fmt, ...) printf("[%s:%d] " fmt, __func__, __LINE__, __VA_ARGS__ )
 
 /*
  * create the next filename and open a new binary file with that name
@@ -81,6 +81,7 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
   time_t  current_time;
   struct tm *tm;
 
+  PRINT_NAME(rfile->name);
   if (rfile->name != NULL) {
     if (rb_data.unlimited == FALSE) {
       /* remove old file (if any, so ignore error) */
@@ -268,6 +269,7 @@ ringbuf_switch_file(FILE **pdh, gchar **save_file, int *save_file_fd, int *err)
 
   /* close current file */
 
+  PRINT("closing %p\n", rb_data.pdh);
   if (fclose(rb_data.pdh) == EOF) {
     if (err != NULL) {
       *err = errno;
@@ -282,6 +284,13 @@ ringbuf_switch_file(FILE **pdh, gchar **save_file, int *save_file_fd, int *err)
 
   rb_data.pdh = NULL;
   rb_data.fd  = -1;
+
+  {
+    int current_file_index = (rb_data.curr_file_num) % rb_data.num_files;
+    rb_file *current_rfile = NULL;
+    current_rfile = &rb_data.files[current_file_index];
+    PRINT_NAME(current_rfile->name);
+  }
 
   /* get the next file number and open it */
 
