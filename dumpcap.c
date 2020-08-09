@@ -98,8 +98,9 @@
 /**#define DEBUG_DUMPCAP**/
 /**#define DEBUG_CHILD_DUMPCAP**/
 
-#define PRINT_NAME(name) printf("[%s:%d] %s => %s\n", __func__, __LINE__, #name, name)
-#define PRINT_INT(name) printf("[%s:%d] %s => %d\n", __func__, __LINE__, #name, name)
+#define PRINT(fmt, ...) printf("[%-30s:%4d] " fmt, __func__, __LINE__, __VA_ARGS__ )
+#define PRINT_NAME(name) PRINT("%s => %s\n", #name, name)
+#define PRINT_INT(name) PRINT("%s => %d\n", #name, name)
 
 #ifdef _WIN32
 #include "wsutil/win32-utils.h"
