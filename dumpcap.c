@@ -5374,6 +5374,7 @@ report_packet_count(unsigned int packet_count)
 static void
 report_new_capture_file(const char *filename)
 {
+    printf("%s: %s\n", __func__, filename);
     if (capture_child) {
         g_log(LOG_DOMAIN_CAPTURE_CHILD, G_LOG_LEVEL_DEBUG, "File: %s", filename);
         pipe_write_block(2, SP_FILE, filename);

@@ -568,6 +568,15 @@ sync_pipe_start(capture_options *capture_opts, capture_session *cap_session, inf
          */
         dup2(sync_pipe[PIPE_WRITE], 2);
         ws_close(sync_pipe[PIPE_READ]);
+
+        {
+            int loop;
+            for (loop = 0; argv[loop] != NULL; loop++)
+            {
+                printf("%s: (%d) %s\n", __func__, loop, argv[loop]);
+            }
+        }
+
         execv(argv[0], argv);
         g_snprintf(errmsg, sizeof errmsg, "Couldn't run %s in child process: %s",
                    argv[0], g_strerror(errno));
