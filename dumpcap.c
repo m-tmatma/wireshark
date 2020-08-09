@@ -98,7 +98,8 @@
 /**#define DEBUG_DUMPCAP**/
 /**#define DEBUG_CHILD_DUMPCAP**/
 
-#define PRINT_NAME(name) printf("[%s:%d] %s\n", __func__, __LINE__, name)
+#define PRINT_NAME(name) printf("[%s:%d] %s => %s\n", __func__, __LINE__, #name, name)
+#define PRINT_INT(name) printf("[%s:%d] %s => %d\n", __func__, __LINE__, #name, name)
 
 #ifdef _WIN32
 #include "wsutil/win32-utils.h"
@@ -3388,12 +3389,16 @@ capture_loop_open_output(capture_options *capture_opts, int *save_file_fd,
                 /* Try to open the specified FIFO for use as a capture buffer.
                    Do *not* create it if it doesn't exist.  There's nothing
                    to truncate. If we need to read it, We Have A Problem. */
+                PRINT_NAME(capfile_name);
                 *save_file_fd = ws_open(capfile_name, O_WRONLY|O_BINARY, 0);
             }
         } /* if (...output_to_pipe ... */
 
         else {
+            PRINT_INT(capture_opts->multi_files_on);
             if (capture_opts->multi_files_on) {
+                PRINT_NAME(capfile_name);
+                PRINT_INT(capture_opts->ring_num_files);
                 /* ringbuffer is enabled */
                 *save_file_fd = ringbuf_init(capfile_name,
                                              (capture_opts->has_ring_num_files) ? capture_opts->ring_num_files : 0,
@@ -3406,6 +3411,7 @@ capture_loop_open_output(capture_options *capture_opts, int *save_file_fd,
                 }
             } else {
                 /* Try to open/create the specified file for use as a capture buffer. */
+                PRINT_NAME(capfile_name);
                 *save_file_fd = ws_open(capfile_name, O_WRONLY|O_BINARY|O_TRUNC|O_CREAT,
                                         (capture_opts->group_read_access) ? 0640 : 0600);
             }

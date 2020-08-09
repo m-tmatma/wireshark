@@ -67,6 +67,9 @@ typedef struct _ringbuf_data {
 
 static ringbuf_data rb_data;
 
+#define PRINT_NAME(name) printf("[%s:%d] %s => %s\n", __func__, __LINE__, #name, name)
+#define PRINT_INT(name) printf("[%s:%d] %s => %d\n", __func__, __LINE__, #name, name)
+
 
 /*
  * create the next filename and open a new binary file with that name
@@ -106,6 +109,7 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
     return -1;
   }
 
+  PRINT_NAME(rfile->name);
   rb_data.fd = ws_open(rfile->name, O_RDWR|O_BINARY|O_TRUNC|O_CREAT,
                             rb_data.group_read_access ? 0640 : 0600);
 
@@ -113,6 +117,7 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
     *err = errno;
   }
 
+  PRINT_INT(rb_data.fd);
   return rb_data.fd;
 }
 
@@ -126,6 +131,8 @@ ringbuf_init(const char *capfile_name, guint num_files, gboolean group_read_acce
   char        *pfx, *last_pathsep;
   gchar       *save_file;
 
+  PRINT_NAME(capfile_name);
+  PRINT_INT(num_files);
   rb_data.files = NULL;
   rb_data.curr_file_num = 0;
   rb_data.fprefix = NULL;
