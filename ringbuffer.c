@@ -86,7 +86,7 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
     {
       char    command[256];
       int n;
-      sprintf(command, "%s %s", rb_data.filter_program, rfile->name);
+      sprintf(command, "%s %s &", rb_data.filter_program, rfile->name);
       n = system(command);
       if (n != 0)
       {
