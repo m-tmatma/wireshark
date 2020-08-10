@@ -1089,6 +1089,14 @@ bool CaptureOptionsDialog::saveOptionsToPreferences()
 #endif
         }
     }
+
+    QString filter_program = ui->filterProgramEdit->text();
+    if (filter_program.length() > 0) {
+        global_capture_opts.filter_program = qstring_strdup(filter_program);
+    } else {
+        global_capture_opts.filter_program = NULL;
+    }
+
     prefs_main_write();
     return true;
 }
