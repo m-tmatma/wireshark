@@ -42,6 +42,14 @@
 
 #include <glib.h>
 
+#ifdef HAVE_UNISTD_H
+#include <unistd.h>
+#endif
+
+#ifdef _WIN32
+#include <wsutil/win32-utils.h>
+#endif
+
 #include "ringbuffer.h"
 #include <wsutil/file_util.h>
 
@@ -70,6 +78,66 @@ typedef struct _ringbuf_data {
 
 static ringbuf_data rb_data;
 
+/*
+ * launch a filter program to process rotating a dump.
+ */
+static int ringbuf_exec_filter_program(rb_file *rfile)
+{
+  int ret = 0;
+#ifndef _WIN32
+  #if 0
+  pid_t pid;
+  pid = fork();
+  if (pid == 0)
+  {
+    char *exename;
+    char *commandline;
+    exename = rb_data.filter_program;
+    commandline = rfile->name;
+
+    execl(exename, exename, commandline, NULL);
+  }
+  if (pid == -1)
+  {
+    fprintf(stderr, "cannot fork(): %s\n", g_strerror(errno));
+    ret = -1;
+  }
+  #else
+  char *commandline;
+  commandline = g_strdup_printf("%s %s &", rb_data.filter_program, rfile->name);
+  ret = system(commandline);
+  g_free(commandline);
+  #endif
+#else
+  PROCESS_INFORMATION pi;
+  STARTUPINFO si;
+  char *exename;
+  char *commandline;
+
+  memset(&pi, 0, sizeof(pi));
+  memset(&si, 0, sizeof(si));
+
+  si.cb = sizeof(si);
+  si.dwFlags = STARTF_USESTDHANDLES | STARTF_USESHOWWINDOW;
+  si.hStdInput = GetStdHandle(STD_INPUT_HANDLE);
+  si.hStdOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+  si.hStdError = GetStdHandle(STD_ERROR_HANDLE);
+
+  exename = rb_data.filter_program;
+  commandline = g_strdup_printf("%s %s", exename, rfile->name);
+  if (!win32_create_process(exename, commandline, NULL, NULL, TRUE, 0, NULL, NULL, &si, &pi))
+  {
+    fprintf(stderr, "win32_create_process(%s) failed\n", exename);
+    ret = -1;
+  }
+  else
+  {
+    CloseHandle(pi.hThread);
+  }
+  g_free(commandline);
+#endif
+  return ret;
+}
 
 /*
  * create the next filename and open a new binary file with that name
@@ -84,11 +152,8 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
   if (rfile->name != NULL) {
     if (rb_data.filter_program != NULL)
     {
-      char    command[256];
-      int n;
-      sprintf(command, "%s %s &", rb_data.filter_program, rfile->name);
-      n = system(command);
-      if (n != 0)
+      int ret = ringbuf_exec_filter_program(rfile);
+      if (ret != 0)
       {
         return -1;
       }
