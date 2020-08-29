@@ -46,6 +46,10 @@
 #include <unistd.h>
 #endif
 
+#ifdef HAVE_SYS_WAIT_H
+# include <sys/wait.h>
+#endif
+
 #ifdef _WIN32
 #include <wsutil/win32-utils.h>
 #endif
@@ -100,6 +104,11 @@ static int ringbuf_exec_filter_program(rb_file *rfile)
   {
     fprintf(stderr, "cannot fork(): %s\n", g_strerror(errno));
     ret = -1;
+  }
+  else
+  {
+    int status;
+    waitpid( -1, &status, WNOHANG );
   }
 #else
   PROCESS_INFORMATION pi;
