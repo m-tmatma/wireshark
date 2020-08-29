@@ -85,7 +85,6 @@ static int ringbuf_exec_filter_program(rb_file *rfile)
 {
   int ret = 0;
 #ifndef _WIN32
-  #if 0
   pid_t pid;
   pid = fork();
   if (pid == 0)
@@ -102,12 +101,6 @@ static int ringbuf_exec_filter_program(rb_file *rfile)
     fprintf(stderr, "cannot fork(): %s\n", g_strerror(errno));
     ret = -1;
   }
-  #else
-  char *commandline;
-  commandline = g_strdup_printf("%s %s &", rb_data.filter_program, rfile->name);
-  ret = system(commandline);
-  g_free(commandline);
-  #endif
 #else
   PROCESS_INFORMATION pi;
   STARTUPINFO si;
