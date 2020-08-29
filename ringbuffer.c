@@ -152,17 +152,18 @@ static int ringbuf_open_file(rb_file *rfile, int *err)
   struct tm *tm;
 
   if (rfile->name != NULL) {
+    int ret = 0;
     if (rb_data.unlimited == FALSE) {
       /* remove old file (if any, so ignore error) */
       ws_unlink(rfile->name);
     }
     else if (rb_data.filter_program != NULL) {
-      int ret = ringbuf_exec_filter_program(rfile);
-      if (ret != 0) {
-        return -1;
-      }
+      ret = ringbuf_exec_filter_program(rfile);
     }
     g_free(rfile->name);
+    if (ret != 0) {
+      return -1;
+    }
   }
 
 #ifdef _WIN32
